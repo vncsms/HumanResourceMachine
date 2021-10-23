@@ -1,0 +1,46 @@
+.box {
+    border-radius: 3px;
+    background-color: green;
+    width: 50px;
+    height: 55px;
+    margin-bottom: 5px;
+}
+
+.innerBox {
+    box-sizing: border-box;
+    border: 1px solid #abd980;
+    width: 50px;
+    border-radius: 3px;
+    height: 50px;
+    background-color: #b9e9ae;
+    color: #4E9F3D;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.table {
+    display: flex;
+    background-color: aliceblue;
+    width: 60px;
+    height: 400px;
+    border-radius: 5px;
+    align-items: center;
+    padding: 20px 0px;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.memory {
+    width: 80px;
+    height: 80px;
+    background-color: #43b280;
+    box-sizing: border-box;
+    position: relative;
+    border: 1px solid #294d07;
+    display: flex;
+    justify-content: center;
+}
