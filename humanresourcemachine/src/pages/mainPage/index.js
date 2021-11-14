@@ -15,7 +15,7 @@ export default class MainPage extends Component {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <a>Create a new challenge</a>
-            <a>Choose a existing one</a>
+            <a href={"/challenges"}>Choose a existing one</a>
           </div>
       </div>
     );
