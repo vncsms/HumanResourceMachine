@@ -135,3 +135,22 @@ button {
   height: 20px;
   filter: invert(1);
 }
+
+.commands-box {
+  position: absolute;
+  height: 90%;
+  right: 0;
+  background-color: pink;
+  bottom: 0;
+  display: flex;
+  width: 200px;
+  flex-direction: column;
+}
+
+.commands-item {
+  background-color: yellow;
+  margin: 5px 10px;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 5px;
+}

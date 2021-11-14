@@ -3,6 +3,7 @@ import PlayButton from '../../assets/icons/play-solid.svg';
 import NextButton from '../../assets/icons/step-forward-solid.svg';
 import StopButton from '../../assets/icons/stop-solid.svg';
 import PauseButton from '../../assets/icons/pause-solid.svg';
+import { DragDropContext, Droppable, Draggable  } from 'react-beautiful-dnd';
 import {
   add,
   sub
@@ -14,7 +15,9 @@ import styles from './style.module.css';
 
 export default function MainPage () {
 
-  const [commands, setCommands] = useState([]);
+  const [commands, setCommands] = useState([
+    'inbox', 'inbox', 'outbox' 
+  ]);
   const [code, setCode] = useState('');
   const [labels, setLabels] = useState({});
   const [messageError, setMessageError] = useState('');
@@ -65,6 +68,7 @@ export default function MainPage () {
     setRam(null);
     setOutbox([]);
     setCommands([]);
+    setPlaying(false);
     setAnswer(false);
   }
 
@@ -317,6 +321,15 @@ export default function MainPage () {
     setInter(interval);
   }
 
+  const handleOnDragEnd = (result) => {
+    if(!result.destination) return;
+    const items = [...commands];
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setCommands(items);
+  }
+
   return (
     <div style={{
         backgroundColor: 'teal',
@@ -338,11 +351,16 @@ export default function MainPage () {
           compile
         </button>
         <button className="button-game"
+          disabled={playing}
+          style={{
+            backgroundColor: !playing ? "#43b280" : 'rgb(190, 204, 199)',
+          }}
           onClick={() => nextCommand2(memory, ram, outbox, inbox, offSet)}>
           <img className="control-button" src={NextButton} alt="React Logo" />
         </button>
         <button className="button-game"
           disabled={commands.length === 0}
+          style={{ backgroundColor: "#43b280" }}
           onClick={() => {
             setPlaying(!playing);
           }}>
@@ -420,6 +438,30 @@ export default function MainPage () {
           </div>
         </div>
       : null }
+      <DragDropContext onDragEnd={handleOnDragEnd}>
+        <Droppable droppableId="characters">
+          {(provided) => (
+            <ul {...provided.droppableProps} ref={provided.innerRef} 
+              className={'commands-box characters'}>
+              {commands.map((item, id) => {
+               return (
+                <Draggable  key={id} draggableId={id.toString()} index={id}>
+                  {(provided) => (
+                    <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                      <div className={'commands-item'}>
+                        {item}
+                      </div>
+                    </li>
+                  )}
+                </Draggable>
+               ) 
+              })}
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
+      </DragDropContext>
+      {/*
       <textarea style={{
         resize: 'none',
         position: 'absolute',
@@ -430,6 +472,7 @@ export default function MainPage () {
       value={code}
       onChange={(e) => {setCode(e.target.value)}}>
       </textarea>
+      */}
     </div>       
   );
 }
