@@ -1,16 +1,39 @@
-import React, { Component, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { challenges } from "./challenges";
 import { Link } from "react-router-dom"
 
 export default function Challenges () {
 
-  const [modal, setModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const ref = useRef();
+  useOnClickOutside(ref, () => setShowModal(false));
+
+  function useOnClickOutside(ref, handler) {
+    useEffect(
+      () => {
+        const listener = (event) => {
+          // Do nothing if clicking ref's element or descendent elements
+          if (!ref.current || ref.current.contains(event.target)) {
+            return;
+          }
+          handler(event);
+        };
+        document.addEventListener("mousedown", listener);
+        document.addEventListener("touchstart", listener);
+        return () => {
+          document.removeEventListener("mousedown", listener);
+          document.removeEventListener("touchstart", listener);
+        };
+      },
+      [ref, handler]
+    );
+  }
 
   const challengeButtom = (item) => {
     return <div className="challenge-button-container">
       <button 
-        onClick={() => {setModal(true); setSelectedItem(item)}}
+        onClick={() => {setShowModal(true); setSelectedItem(item)}}
         className="challenge-button">
         {item.name}
       </button>
@@ -23,9 +46,9 @@ export default function Challenges () {
           return challengeButtom(item)
         })}
       </div>
-      { modal ?
+      { showModal ?
         <div className="challenge-modal">
-          <div className="challenge-modal-inner">
+          <div className="challenge-modal-inner" ref={ref}>
             <div className="challenge-modal-description">
               {selectedItem.description}
             </div>

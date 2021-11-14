@@ -70,8 +70,9 @@ button {
 .button-game {
   height: 40px;
   padding: 0 10px;
-  background-color: aquamarine;
+  background-color: rgb(190, 204, 199);
   border-radius: 5px;
+  margin: 0 10px;
 }
 
 .challenge-button-container {
@@ -127,4 +128,10 @@ button {
   background-color: thistle;
   border-radius: 5px;
   padding: 5px;
+}
+
+.control-button {
+  width: 20px;
+  height: 20px;
+  filter: invert(1);
 }

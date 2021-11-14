@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from "react";
+import PlayButton from '../../assets/icons/play-solid.svg';
+import NextButton from '../../assets/icons/step-forward-solid.svg';
+import StopButton from '../../assets/icons/stop-solid.svg';
+import PauseButton from '../../assets/icons/pause-solid.svg';
 import {
   add,
   sub
@@ -23,6 +27,8 @@ export default function MainPage () {
   const location = useLocation();
   const [answer, setAnswer] = useState([]);
   const [initialInbox, setInitialInbox] = useState([]);
+  const [playing, setPlaying] = useState(false);
+  const [interval, setInter] = useState();
 
   const checkCommand = (cmd) => {
     const commandAndValue = cmd.split(' ');
@@ -59,6 +65,7 @@ export default function MainPage () {
     setRam(null);
     setOutbox([]);
     setCommands([]);
+    setAnswer(false);
   }
 
   const errorHand = () => {
@@ -264,6 +271,7 @@ export default function MainPage () {
   }
 
   const nextCommand2 = (mem, kram, out, inb, offs) => {
+    console.log(offs);
     if(offs >= commands.length) {
       endExecError();
       restart();
@@ -286,13 +294,27 @@ export default function MainPage () {
     }
   }
 
+  useEffect(() => {
+    if (playing) {
+      playCommands(memory, ram, outbox, inbox, offSet);
+    } else {
+      clearInterval(interval);
+    }
+  }, [playing])
+
   const playCommands = (mem, kram, out, inb, offs) => {
-    setTimeout(() => {
+    const interval = setInterval(() => {
       const result = nextCommand2(mem, kram, out, inb, offs);
-      if(!result.error) {
-        playCommands(result.mem, result.kram, result.out, result.inb, result.offs);
+      mem = result.mem;
+      kram = result.kram;
+      out = result.out;
+      inb = result.inb;
+      offs = result.offs;
+      if(result.error) {
+        setPlaying(false);
       }
     }, 1000);
+    setInter(interval);
   }
 
   return (
@@ -315,21 +337,24 @@ export default function MainPage () {
         <button className="button-game" onClick={() => compile()}>
           compile
         </button>
-        <div style={{width: 25, height: 50}}></div>
+        <button className="button-game"
+          onClick={() => nextCommand2(memory, ram, outbox, inbox, offSet)}>
+          <img className="control-button" src={NextButton} alt="React Logo" />
+        </button>
         <button className="button-game"
           disabled={commands.length === 0}
-          onClick={() => playCommands(memory, ram, outbox, inbox, offSet)}>
-          next
+          onClick={() => {
+            setPlaying(!playing);
+          }}>
+          <img className="control-button" src={playing? PauseButton : PlayButton} alt="React Logo" />
         </button>
-        <div style={{width: 25, height: 50}}></div>
-        <button className="button-game"
-          disabled={commands.length === 0}
-          onClick={() => playCommands(memory, ram, outbox, inbox, offSet)}>
-          next
-        </button>
-        <div style={{width: 25, height: 50}}></div>
-        <button className="button-game" onClick={() => restart()}>
-          reset
+        <button style={{backgroundColor: 'brown'}}
+          className="button-game"
+          onClick={() => {
+            clearInterval(interval);
+            restart();
+          }}>
+        <img className="control-button" src={StopButton} alt="React Logo" />
         </button>
       </div>
       
@@ -337,7 +362,6 @@ export default function MainPage () {
         display: 'flex',
         width: 400,
         padding: '10px',
-        backgroundColor: 'violet',
         justifyContent: "center",
         flexWrap: "wrap",
         position: "absolute",
