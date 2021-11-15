@@ -22,7 +22,7 @@ export default function MainPage () {
   const [messageError, setMessageError] = useState('');
   const [offSet, setOffSet] = useState(0);
   const [memory, setMemory] = useState(new Array(20).fill(null));
-  const [inbox, setInbox] = useState([99,2,3,4,5,6,7,8,9]);
+  const [inbox, setInbox] = useState([]);
   const [outbox, setOutbox] = useState([]);
   const [ram, setRam] = useState(null);
   const [modalError, setModalError] = useState(false);
@@ -417,22 +417,11 @@ export default function MainPage () {
   }
 
   return (
-    <div style={{
-        backgroundColor: 'teal',
-        width: '1200px',
-        height: '800px',
-        position: 'relative',}}>
+    <div className='game-page'>
       <div style={{position: 'absolute', bottom: 0, left: '10px'}}>
         {renderTable(inbox)}
       </div>
-      <div style={{
-        position: 'absolute',
-        left: 200,
-        backgroundColor: 'yellow',
-        padding: 20,
-        display: "flex",
-        bottom: 0,
-      }}>
+      <div className='control-panel'>
         <button className="button-game"
           disabled={playing}
           style={{
@@ -459,16 +448,7 @@ export default function MainPage () {
         </button>
       </div>
       
-      <div style={{
-        display: 'flex',
-        width: 400,
-        padding: '10px',
-        justifyContent: "center",
-        flexWrap: "wrap",
-        position: "absolute",
-        left: "150px",
-        top: "200px",
-      }}>
+      <div className='memory-board'>
         {
           memory.map((item, index) =>
             (
@@ -523,54 +503,11 @@ export default function MainPage () {
         </div>
       : null }
       <DragDropContext onDragStart={handleOnDragStart} onDragEnd={handleOnDragEnd}>
-        <Droppable droppableId="characters">
-          {(provided) => (
-            <ul {...provided.droppableProps} ref={provided.innerRef} 
-              className={'commands-box'}>
-              {commands.map((item, id) => {
-               return (
-                <Draggable  key={id} draggableId={id.toString()} index={id}>
-                  {(provided) => (
-                    <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
-                      <div style={{display: 'flex'}}>
-                        { modalMemory && selectTarget.command == id ?
-                          <div
-                            style={{marginLeft: '5px', marginRight: '5px'}}
-                            className={'commands-item'}>
-                              <img style={{width: 10, height: 10}} src={Arrow} alt="React Logo" />
-                          </div>
-                        : null }
-                        <div className={'commands-item'}>
-                          {item.command}
-                        </div>
-                        { item.hasTarget ?
-                          <button
-                            onClick={() => {
-                              setSelectedTarget({
-                                target: item.target,
-                                command: id,
-                              });
-                              setModalMemory(true)}}
-                            className={'commands-item'}>
-                            {item.target}
-                          </button>
-                        : null }
-                      </div>
-                    </li>
-                  )}
-                </Draggable>
-               ) 
-              })}
-              {provided.placeholder}
-            </ul>
-          )}
-        </Droppable>
-        {commandHold}
         <ul className={'commands-box-placeholder'}>
           {defaultCommands.map((item, id) => {
             return (
               <li>
-                <div className={'commands-item'}>
+                <div className={'commands-item commands-item-default'}>
                   {item.command}
                 </div>
               </li>
@@ -583,11 +520,51 @@ export default function MainPage () {
               className={'commands-box-source'}>
               {defaultCommands.map((item, id) => {
                return (
-                <Draggable key={id} draggableId={(id).toString() + 'k'} index={id}>
+                <Draggable isDragDisabled={playing} key={id} draggableId={(id).toString() + 'k'} index={id}>
                   {(provided) => (
                     <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
-                      <div className={commandHold === id ? 'commands-item-hold' : 'commands-item-invisible' }>
+                      <div className={commandHold === id ? 'commands-item-hold commands-item-default' : 'commands-item-default commands-item-invisible' }>
                         {item.command}
+                      </div>
+                    </li>
+                  )}
+                </Draggable>
+               ) 
+              })}
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
+        <Droppable droppableId="characters">
+          {(provided) => (
+            <ul {...provided.droppableProps} ref={provided.innerRef} 
+              className={'commands-box'}>
+              {commands.map((item, id) => {
+               return (
+                <Draggable isDragDisabled={playing} key={id} draggableId={id.toString()} index={id}>
+                  {(provided) => (
+                    <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                      <div 
+                        style={{backgroundColor: modalMemory && selectTarget.command === id ? 'green' : (playing && offSet === id ? 'brown' : 'aqua')}}
+                        className='commands-container-item'>
+                        <div className={'code-lines'}>
+                          {id + 1}
+                        </div>
+                        <div className={'commands-item commands-item-default'}>
+                          {item.command}
+                        </div>
+                        { item.hasTarget ?
+                          <button
+                            onClick={() => {
+                              setSelectedTarget({
+                                target: item.target,
+                                command: id,
+                              });
+                              setModalMemory(true)}}
+                            className={'commands-item commands-item-default'}>
+                            {item.target}
+                          </button>
+                        : null }
                       </div>
                     </li>
                   )}
@@ -608,16 +585,7 @@ export default function MainPage () {
           left: 0,
           display: 'flex',
         }}>
-          <div style={{
-            display: 'flex',
-            width: 400,
-            padding: '10px',
-            justifyContent: "center",
-            flexWrap: "wrap",
-            position: "absolute",
-            left: "150px",
-            top: "200px",
-          }} ref={ref}>
+          <div className='memory-board' ref={ref}>
             {
               memory.map((item, index) =>
                 (

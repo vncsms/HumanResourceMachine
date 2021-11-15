@@ -144,56 +144,97 @@ button {
   border-top-left-radius: 5px;
   bottom: 0;
   display: flex;
-  width: 200px;
+  width: 300px;
   flex-direction: column;
 }
 
 .commands-box-source {
   position: absolute;
-  height: 300px;
-  right: 200px;
+  height: 550px;
+  right: 250px;
   background-color: rgba(255, 255, 255, 0);
   top: 100px;
   display: flex;
   width: 200px;
   flex-direction: column;
+  transition: 1s;
 }
 
 .commands-box-placeholder {
   position: absolute;
-  height: 400px;
+  height: 550px;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
-  right: 200px;
+  right: 250px;
   background-color: rgb(168, 30, 30);
   top: 100px;
   display: flex;
   width: 200px;
   flex-direction: column;
+  transition: 1s;
 }
 
-.commands-item {
-  background-color: yellow;
+.commands-item-default {
   margin: 5px 5px;
   width: fit-content;
-  padding: 5px 10px;
+  padding: 0px 10px;
+  display: flex;
+  align-items: center;
+  height: 40px;
   border-radius: 5px;
   min-width: 10px;
 }
 
+.commands-item {
+  background-color: yellow;
+}
+
 .commands-item-invisible {
   background-color: rgba(255, 255, 255, 0);
-  margin: 5px 10px;
-  width: fit-content;
-  padding: 5px 10px;
-  border-radius: 5px;
   color: rgba(255, 255, 255, 0);
 }
 
 .commands-item-hold {
   background-color: yellow;
-  margin: 5px 10px;
-  width: fit-content;
-  padding: 5px 10px;
-  border-radius: 5px;
+}
+
+.game-page {
+  background-color: teal;
+  width: 1200px;
+  height: 800px;
+  position: relative;
+}
+
+.control-panel {
+  position: absolute;
+  left: 200px;
+  background-color: yellow;
+  padding: 20px;
+  display: flex;
+  bottom: 0;
+}
+
+.memory-board {
+  display: flex;
+  width: 400px;
+  padding: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: absolute;
+  left: 150px;
+  top: 200px;
+}
+
+.commands-container-item {
+  display: flex;
+  background-color: aqua;
+}
+
+.code-lines {
+  background-color: bisque;
+  height: auto;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
