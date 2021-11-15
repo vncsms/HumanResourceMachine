@@ -141,13 +141,55 @@ button {
   height: 90%;
   right: 0;
   background-color: pink;
+  border-top-left-radius: 5px;
   bottom: 0;
   display: flex;
   width: 200px;
   flex-direction: column;
 }
 
+.commands-box-source {
+  position: absolute;
+  height: 300px;
+  right: 200px;
+  background-color: rgba(255, 255, 255, 0);
+  top: 50px;
+  display: flex;
+  width: 200px;
+  flex-direction: column;
+}
+
+.commands-box-placeholder {
+  position: absolute;
+  height: 400px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  right: 200px;
+  background-color: rgb(168, 30, 30);
+  top: 100px;
+  display: flex;
+  width: 200px;
+  flex-direction: column;
+}
+
 .commands-item {
+  background-color: yellow;
+  margin: 5px 10px;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.commands-item-invisible {
+  background-color: rgba(255, 255, 253, 0);
+  margin: 5px 10px;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0);
+}
+
+.commands-item-hold {
   background-color: yellow;
   margin: 5px 10px;
   width: fit-content;

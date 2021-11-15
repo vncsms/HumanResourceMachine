@@ -32,6 +32,20 @@ export default function MainPage () {
   const [initialInbox, setInitialInbox] = useState([]);
   const [playing, setPlaying] = useState(false);
   const [interval, setInter] = useState();
+  const [commandHold, setCommandHold] = useState(null);
+  const [defaultCommands] = useState([
+    'inbox',
+    'outbox',
+    'copyfrom',
+    'copyto',
+    'add',
+    'sub',
+    'bump+',
+    'bump-',
+    'jump',
+    'jump zero',
+    'jump negative',
+  ])
 
   const checkCommand = (cmd) => {
     const commandAndValue = cmd.split(' ');
@@ -67,7 +81,6 @@ export default function MainPage () {
     setInbox([...initialInbox]);
     setRam(null);
     setOutbox([]);
-    setCommands([]);
     setPlaying(false);
     setAnswer(false);
   }
@@ -322,12 +335,26 @@ export default function MainPage () {
   }
 
   const handleOnDragEnd = (result) => {
-    if(!result.destination) return;
+    setCommandHold(null);
+    const { source, destination } = result;
+    if(!destination || destination.droppableId == 'characters2') return;
     const items = [...commands];
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
+    if(source.droppableId == 'characters2') {
+      const newItem = defaultCommands[source.index];
+      items.splice(destination.index, 0, newItem);  
+    } else {
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(destination.index, 0, reorderedItem);
+    }
     setCommands(items);
+  }
+
+  const handleOnDragStart = (result) => {
+    const { source } = result;
+
+    if(source.droppableId == 'characters2') {
+      setCommandHold(source.index);
+    }
   }
 
   return (
@@ -341,7 +368,7 @@ export default function MainPage () {
       </div>
       <div style={{
         position: 'absolute',
-        left: 300,
+        left: 200,
         backgroundColor: 'yellow',
         padding: 20,
         display: "flex",
@@ -383,7 +410,7 @@ export default function MainPage () {
         justifyContent: "center",
         flexWrap: "wrap",
         position: "absolute",
-        left: "290px",
+        left: "150px",
         top: "200px",
       }}>
         {
@@ -403,10 +430,10 @@ export default function MainPage () {
           )
         }
       </div>
-      <div style={{position: 'absolute', bottom: 0, right: '250px'}}>
+      <div style={{position: 'absolute', bottom: 0, right: '500px'}}>
         {renderTable(outbox)}
       </div>
-      <div style={{position: 'absolute', top: 50, right: '600px'}}>
+      <div style={{position: 'absolute', top: 50, left: '300px'}}>
         <div className={styles.box}>
           <div className={styles.innerBox}>{ram}</div>
         </div>
@@ -438,11 +465,11 @@ export default function MainPage () {
           </div>
         </div>
       : null }
-      <DragDropContext onDragEnd={handleOnDragEnd}>
+      <DragDropContext onDragStart={handleOnDragStart} onDragEnd={handleOnDragEnd}>
         <Droppable droppableId="characters">
           {(provided) => (
             <ul {...provided.droppableProps} ref={provided.innerRef} 
-              className={'commands-box characters'}>
+              className={'commands-box'}>
               {commands.map((item, id) => {
                return (
                 <Draggable  key={id} draggableId={id.toString()} index={id}>
@@ -460,19 +487,40 @@ export default function MainPage () {
             </ul>
           )}
         </Droppable>
+        {commandHold}
+        <ul className={'commands-box-placeholder'}>
+          {defaultCommands.map((item, id) => {
+            return (
+              <li>
+                <div className={'commands-item'}>
+                  {item}
+                </div>
+              </li>
+            ) 
+          })}
+        </ul>
+        <Droppable droppableId="characters2">
+          {(provided) => (
+            <ul {...provided.droppableProps} ref={provided.innerRef} 
+              className={'commands-box-source'}>
+              {defaultCommands.map((item, id) => {
+               return (
+                <Draggable key={id} draggableId={(id).toString() + 'k'} index={id}>
+                  {(provided) => (
+                    <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                      <div className={commandHold === id ? 'commands-item-hold' : 'commands-item-invisible' }>
+                        {item}
+                      </div>
+                    </li>
+                  )}
+                </Draggable>
+               ) 
+              })}
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
       </DragDropContext>
-      {/*
-      <textarea style={{
-        resize: 'none',
-        position: 'absolute',
-        height: '90%',
-        right: 0,
-        bottom: 0,
-      }} cols="25"
-      value={code}
-      onChange={(e) => {setCode(e.target.value)}}>
-      </textarea>
-      */}
     </div>       
   );
 }
