@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import PlayButton from '../../assets/icons/play-solid.svg';
 import NextButton from '../../assets/icons/step-forward-solid.svg';
 import StopButton from '../../assets/icons/stop-solid.svg';
 import PauseButton from '../../assets/icons/pause-solid.svg';
+import Arrow from '../../assets/icons/angle-right-solid.svg';
 import { DragDropContext, Droppable, Draggable  } from 'react-beautiful-dnd';
 import {
   add,
@@ -15,9 +16,7 @@ import styles from './style.module.css';
 
 export default function MainPage () {
 
-  const [commands, setCommands] = useState([
-    'inbox', 'inbox', 'outbox' 
-  ]);
+  const [commands, setCommands] = useState([]);
   const [code, setCode] = useState('');
   const [labels, setLabels] = useState({});
   const [messageError, setMessageError] = useState('');
@@ -33,25 +32,57 @@ export default function MainPage () {
   const [playing, setPlaying] = useState(false);
   const [interval, setInter] = useState();
   const [commandHold, setCommandHold] = useState(null);
+  const [modalMemory, setModalMemory] = useState(false);
+  const [selectTarget, setSelectedTarget] = useState({
+    command: 0,
+    target: 0,
+  });
   const [defaultCommands] = useState([
-    'inbox',
-    'outbox',
-    'copyfrom',
-    'copyto',
-    'add',
-    'sub',
-    'bump+',
-    'bump-',
-    'jump',
-    'jump zero',
-    'jump negative',
+    { 
+      command: 'inbox',
+      hasTarget: false,
+    },
+    { 
+      command: 'outbox',
+      hasTarget: false,
+    },
+    { 
+      command: 'copyfrom',
+      hasTarget: true,
+    },
+    {
+      command: 'copyto',
+      hasTarget: true,
+    },
+    {
+      command: 'add',
+      hasTarget: true,
+    },
+    {
+      command: 'sub',
+      hasTarget: true,
+    },
+    {
+      command: 'bumpup',
+      hasTarget: true,
+    },
+    {
+      command: 'bumpdn',
+      hasTarget: true,
+    },
+    {
+      command: 'jump',
+      hasTarget: true,
+    },
+    {
+      command: 'jumpz',
+      hasTarget: true,
+    },
+    {
+      command: 'jumpn',
+      hasTarget: true,
+    }
   ])
-
-  const checkCommand = (cmd) => {
-    const commandAndValue = cmd.split(' ');
-    return commandAndValue;
-  }
-  
 
   useEffect(() => {
     const data = location.state.data;
@@ -60,6 +91,30 @@ export default function MainPage () {
     setInitialInbox([...data.tests[0].inbox]);
     setAnswer(data.tests[0].outbox);
   }, [location]);
+
+  const ref = useRef();
+  useOnClickOutside(ref, () => setModalMemory(false));
+
+  function useOnClickOutside(ref, handler) {
+    useEffect(
+      () => {
+        const listener = (event) => {
+          // Do nothing if clicking ref's element or descendent elements
+          if (!ref.current || ref.current.contains(event.target)) {
+            return;
+          }
+          handler(event);
+        };
+        document.addEventListener("mousedown", listener);
+        document.addEventListener("touchstart", listener);
+        return () => {
+          document.removeEventListener("mousedown", listener);
+          document.removeEventListener("touchstart", listener);
+        };
+      },
+      [ref, handler]
+    );
+  }
 
   const renderTable = (data) => {
     return (
@@ -186,36 +241,35 @@ export default function MainPage () {
   const freeExectuion = (mem, kram, out, inb, offs) => {
 
     const cmd = commands[offs];
-    const cv = checkCommand(cmd);
     console.log(cmd);
 
-    switch(cv[0]) {
+    switch(cmd.command) {
       case 'add':
         if (kram == null) {
           errorHand();
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        if (mem[parseInt(cv[1])] == null) {
-          errorMemory(cv[1]);
+        if (mem[parseInt(cmd.target)] == null) {
+          errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = add(ram, mem[parseInt(cv[1])]);
+        kram = add(ram, mem[parseInt(cmd.target)]);
         offs += 1;
         break;
       case 'bumpup':
-        if (mem[parseInt(cv[1])] == null) {
-          errorMemory(cv[1]);
+        if (mem[parseInt(cmd.target)] == null) {
+          errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = mem[parseInt(cv[1])] += 1;
+        kram = mem[parseInt(cmd.target)] += 1;
         offs += 1;
         break;
       case 'bumpdn':
-        if (mem[parseInt(cv[1])] == null) {
-          errorMemory(cv[1]);
+        if (mem[parseInt(cmd.target)] == null) {
+          errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = mem[parseInt(cv[1])] -= 1;
+        kram = mem[parseInt(cmd.target)] -= 1;
         offs -= 1;
         break;
       case 'sub':
@@ -223,11 +277,11 @@ export default function MainPage () {
           errorHand();
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        if (mem[parseInt(cv[1])] == null) {
-          errorMemory(cv[1]);
+        if (mem[parseInt(cmd.target)] == null) {
+          errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = sub(ram, mem[parseInt(cv[1])]);
+        kram = sub(ram, mem[parseInt(cmd.target)]);
         offs += 1;
         break;
       case 'copyto':
@@ -235,16 +289,16 @@ export default function MainPage () {
           this.errorHand();
           break;
         }
-        mem[parseInt(cv[1])] = kram;
+        mem[parseInt(cmd.target)] = kram;
         setMemory(mem);
         setOffSet(offSet + 1);
         break;
       case 'copyfrom':
-        if (mem[parseInt(cv[1])] == null) {
-          errorMemory(cv[1]);
+        if (mem[parseInt(cmd.target)] == null) {
+          errorMemory(cmd.target);
           break;
         }
-        kram = mem[parseInt(cv[1])];
+        kram = mem[parseInt(cmd.target)];
         offs += 1;
         break;
       case 'inbox':
@@ -261,21 +315,21 @@ export default function MainPage () {
         offs += 1;
         break;
       case 'jump':
-        if(cv[1] in labels){
-          offs = labels[cv[1]];
+        if(cmd.target in labels){
+          offs = labels[cmd.target];
         }
         break;
       case 'jumpz':
         if(kram === 0) {
-          if(cv[1] in labels){
-            offs = labels[cv[1]];
+          if(cmd.target in labels){
+            offs = labels[cmd.target];
           }
         }
         break;
       case 'jumpn':
         if(kram < 0) {
-          if(cv[1] in labels){
-            offs = labels[cv[1]];
+          if(cmd.target in labels){
+            offs = labels[cmd.target];
           }
         }
         break;
@@ -337,10 +391,14 @@ export default function MainPage () {
   const handleOnDragEnd = (result) => {
     setCommandHold(null);
     const { source, destination } = result;
-    if(!destination || destination.droppableId == 'characters2') return;
+    if(!destination || destination.droppableId === 'characters2') return;
     const items = [...commands];
-    if(source.droppableId == 'characters2') {
-      const newItem = defaultCommands[source.index];
+    if(source.droppableId === 'characters2') {
+      const newItem = {
+        command: defaultCommands[source.index].command,
+        target: 0,
+        hasTarget: defaultCommands[source.index].hasTarget,
+      }
       items.splice(destination.index, 0, newItem);  
     } else {
       const [reorderedItem] = items.splice(result.source.index, 1);
@@ -352,7 +410,7 @@ export default function MainPage () {
   const handleOnDragStart = (result) => {
     const { source } = result;
 
-    if(source.droppableId == 'characters2') {
+    if(source.droppableId === 'characters2') {
       setCommandHold(source.index);
     }
   }
@@ -374,9 +432,6 @@ export default function MainPage () {
         display: "flex",
         bottom: 0,
       }}>
-        <button className="button-game" onClick={() => compile()}>
-          compile
-        </button>
         <button className="button-game"
           disabled={playing}
           style={{
@@ -438,6 +493,7 @@ export default function MainPage () {
           <div className={styles.innerBox}>{ram}</div>
         </div>
       </div>
+
       {modalError?
         <div style={{
           height: '100%',
@@ -475,8 +531,29 @@ export default function MainPage () {
                 <Draggable  key={id} draggableId={id.toString()} index={id}>
                   {(provided) => (
                     <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
-                      <div className={'commands-item'}>
-                        {item}
+                      <div style={{display: 'flex'}}>
+                        { modalMemory && selectTarget.command == id ?
+                          <div
+                            style={{marginLeft: '5px', marginRight: '5px'}}
+                            className={'commands-item'}>
+                              <img style={{width: 10, height: 10}} src={Arrow} alt="React Logo" />
+                          </div>
+                        : null }
+                        <div className={'commands-item'}>
+                          {item.command}
+                        </div>
+                        { item.hasTarget ?
+                          <button
+                            onClick={() => {
+                              setSelectedTarget({
+                                target: item.target,
+                                command: id,
+                              });
+                              setModalMemory(true)}}
+                            className={'commands-item'}>
+                            {item.target}
+                          </button>
+                        : null }
                       </div>
                     </li>
                   )}
@@ -493,7 +570,7 @@ export default function MainPage () {
             return (
               <li>
                 <div className={'commands-item'}>
-                  {item}
+                  {item.command}
                 </div>
               </li>
             ) 
@@ -509,7 +586,7 @@ export default function MainPage () {
                   {(provided) => (
                     <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
                       <div className={commandHold === id ? 'commands-item-hold' : 'commands-item-invisible' }>
-                        {item}
+                        {item.command}
                       </div>
                     </li>
                   )}
@@ -521,6 +598,55 @@ export default function MainPage () {
           )}
         </Droppable>
       </DragDropContext>
+      {modalMemory?
+        <div style={{
+          height: '100%',
+          width: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          display: 'flex',
+        }}>
+          <div style={{
+            display: 'flex',
+            width: 400,
+            padding: '10px',
+            justifyContent: "center",
+            flexWrap: "wrap",
+            position: "absolute",
+            left: "150px",
+            top: "200px",
+          }} ref={ref}>
+            {
+              memory.map((item, index) =>
+                (
+                  <button style={{borderColor: selectTarget.target === index ? 'red' : '#294d07'}}
+                    onClick={() => {
+                      setSelectedTarget({ 
+                        command: selectTarget.command,
+                        target: index,
+                      });
+                      const items = [...commands];
+                      items[selectTarget.command].target = index;
+                      setCommands(items);
+                      setModalMemory(false);
+                    }}
+                    className={styles.memory} key={index}>
+                    { item || item === 0 ? 
+                        (
+                          <div className={styles.box}>
+                            <div className={styles.innerBox}>{item}</div>
+                          </div>
+                        )
+                      : null}
+                    <div style={{position: 'absolute', bottom: 0}}>{index}</div>
+                  </button>
+                )
+              )
+            }
+          </div>
+        </div>
+      : null }
     </div>       
   );
 }
