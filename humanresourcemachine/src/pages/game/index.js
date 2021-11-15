@@ -134,6 +134,7 @@ export default function MainPage () {
     const data = location.state.data;
     setOffSet(0);
     setInbox([...initialInbox]);
+    setMemory([])
     setRam(null);
     setOutbox([]);
     setPlaying(false);
@@ -286,12 +287,12 @@ export default function MainPage () {
         break;
       case 'copyto':
         if (kram == null) {
-          this.errorHand();
+          errorHand();
           break;
         }
         mem[parseInt(cmd.target)] = kram;
-        setMemory(mem);
-        setOffSet(offSet + 1);
+        // setMemory(mem);
+        offs += 1;
         break;
       case 'copyfrom':
         if (mem[parseInt(cmd.target)] == null) {
