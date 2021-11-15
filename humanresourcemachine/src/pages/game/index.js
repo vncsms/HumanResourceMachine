@@ -33,6 +33,7 @@ export default function MainPage () {
   const [interval, setInter] = useState();
   const [commandHold, setCommandHold] = useState(null);
   const [modalMemory, setModalMemory] = useState(false);
+  const [initialMemory, setInitialMemory] = useState([]);
   const [selectTarget, setSelectedTarget] = useState({
     command: 0,
     target: 0,
@@ -81,14 +82,19 @@ export default function MainPage () {
     {
       command: 'jumpn',
       hasTarget: true,
+    },
+    {
+      command: 'label',
+      hasTarget: true,
     }
   ])
 
   useEffect(() => {
     const data = location.state.data;
-    setMemory(data.memory);
+    setMemory([...data.memory]);
     setInbox([...data.tests[0].inbox]);
     setInitialInbox([...data.tests[0].inbox]);
+    setInitialMemory([...data.memory]);
     setAnswer(data.tests[0].outbox);
   }, [location]);
 
@@ -134,7 +140,7 @@ export default function MainPage () {
     const data = location.state.data;
     setOffSet(0);
     setInbox([...initialInbox]);
-    setMemory([])
+    setMemory(initialMemory);
     setRam(null);
     setOutbox([]);
     setPlaying(false);
@@ -503,7 +509,7 @@ export default function MainPage () {
         </div>
       : null }
       <DragDropContext onDragStart={handleOnDragStart} onDragEnd={handleOnDragEnd}>
-        <ul className={'commands-box-placeholder'}>
+        <ul style={{right: playing ? 0 : '250px'}} className={'commands-box-placeholder'}>
           {defaultCommands.map((item, id) => {
             return (
               <li>
@@ -516,7 +522,7 @@ export default function MainPage () {
         </ul>
         <Droppable droppableId="characters2">
           {(provided) => (
-            <ul {...provided.droppableProps} ref={provided.innerRef} 
+            <ul style={{right: playing ? 0 : '250px'}}s {...provided.droppableProps} ref={provided.innerRef} 
               className={'commands-box-source'}>
               {defaultCommands.map((item, id) => {
                return (

@@ -150,7 +150,7 @@ button {
 
 .commands-box-source {
   position: absolute;
-  height: 550px;
+  height: 600px;
   right: 250px;
   background-color: rgba(255, 255, 255, 0);
   top: 100px;
@@ -162,7 +162,7 @@ button {
 
 .commands-box-placeholder {
   position: absolute;
-  height: 550px;
+  height: 600px;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
   right: 250px;
@@ -181,7 +181,7 @@ button {
   display: flex;
   align-items: center;
   height: 40px;
-  border-radius: 5px;
+  border-radius: 2px;
   min-width: 10px;
 }
 
