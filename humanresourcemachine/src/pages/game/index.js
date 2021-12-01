@@ -398,9 +398,10 @@ export default function MainPage () {
   const handleOnDragEnd = (result) => {
     setCommandHold(null);
     const { source, destination } = result;
-    if(!destination || destination.droppableId === 'characters2') return;
     const items = [...commands];
-    if(source.droppableId === 'characters2') {
+    if(!destination || destination.droppableId === 'characters2') {
+      items.splice(result.source.index, 1);
+    } else if(source.droppableId === 'characters2') {
       const newItem = {
         command: defaultCommands[source.index].command,
         target: 0,
