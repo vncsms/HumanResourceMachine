@@ -18,7 +18,7 @@ export default function MainPage () {
 
   const [commands, setCommands] = useState([]);
   const [code, setCode] = useState('');
-  const [labels, setLabels] = useState({});
+  const [lastLabel, setLastLabel] = useState(0);
   const [messageError, setMessageError] = useState('');
   const [offSet, setOffSet] = useState(0);
   const [memory, setMemory] = useState(new Array(20).fill(null));
@@ -82,10 +82,6 @@ export default function MainPage () {
     {
       command: 'jumpn',
       hasTarget: true,
-    },
-    {
-      command: 'label',
-      hasTarget: true,
     }
   ])
 
@@ -120,6 +116,51 @@ export default function MainPage () {
       },
       [ref, handler]
     );
+  }
+
+  function nextChar(c) {
+      var u = c.toUpperCase();
+      if (same(u,'Z')){
+          var txt = '';
+          var i = u.length;
+          while (i--) {
+              txt += 'A';
+          }
+          return (txt+'A');
+      } else {
+          var p = "";
+          var q = "";
+          if(u.length > 1){
+              p = u.substring(0, u.length - 1);
+              q = String.fromCharCode(p.slice(-1).charCodeAt(0));
+          }
+          var l = u.slice(-1).charCodeAt(0);
+          var z = nextLetter(l);
+          if(z==='A'){
+              return p.slice(0,-1) + nextLetter(q.slice(-1).charCodeAt(0)) + z;
+          } else {
+              return p + z;
+          }
+      }
+  }
+
+  function nextLetter(l){
+      if(l<90){
+          return String.fromCharCode(l + 1);
+      }
+      else{
+          return 'A';
+      }
+  }
+
+  function same(str,char){
+      var i = str.length;
+      while (i--) {
+          if (str[i]!==char){
+              return false;
+          }
+      }
+      return true;
   }
 
   const renderTable = (data) => {
@@ -234,7 +275,6 @@ export default function MainPage () {
     });
     if(!errorCompiler) {
       setCommands(tempC);
-      setLabels(labels);
     }
   }
 
@@ -322,23 +362,23 @@ export default function MainPage () {
         offs += 1;
         break;
       case 'jump':
-        if(cmd.target in labels){
+        /*if(cmd.target in labels){
           offs = labels[cmd.target];
-        }
+        }*/
         break;
       case 'jumpz':
-        if(kram === 0) {
+        /*if(kram === 0) {
           if(cmd.target in labels){
             offs = labels[cmd.target];
           }
-        }
+        }*/
         break;
       case 'jumpn':
-        if(kram < 0) {
+        /*if(kram < 0) {
           if(cmd.target in labels){
             offs = labels[cmd.target];
           }
-        }
+        }*/
         break;
       default:
         offs += 1;
@@ -396,6 +436,7 @@ export default function MainPage () {
   }
 
   const handleOnDragEnd = (result) => {
+    
     setCommandHold(null);
     const { source, destination } = result;
     const items = [...commands];
@@ -407,11 +448,31 @@ export default function MainPage () {
         target: 0,
         hasTarget: defaultCommands[source.index].hasTarget,
       }
+      if (['jumpz', 'jump', 'jumpn'].includes(newItem.command)) {
+        newItem.target = lastLabel + 1;
+        const newLabel = {
+          command: 'label',
+          target: '',
+          id: newItem.target,
+          hasTarget: false,
+        }
+        items.splice(destination.index, 0, newLabel);  
+        setLastLabel(lastLabel + 1);
+      }
       items.splice(destination.index, 0, newItem);  
     } else {
       const [reorderedItem] = items.splice(result.source.index, 1);
       items.splice(destination.index, 0, reorderedItem);
     }
+
+    let target = 'A';
+    items.forEach((item) => {
+      if (item.command === 'label') {
+        item.target = target;
+        target = nextChar(target);
+      }
+    });
+
     setCommands(items);
   }
 
@@ -558,18 +619,23 @@ export default function MainPage () {
                           {id + 1}
                         </div>
                         <div className={'commands-item commands-item-default'}>
-                          {item.command}
+                          {item.command === 'label' ? item.target : item.command}
                         </div>
                         { item.hasTarget ?
                           <button
                             onClick={() => {
-                              setSelectedTarget({
-                                target: item.target,
-                                command: id,
-                              });
-                              setModalMemory(true)}}
+                              if (!item.command.includes('jump')) {
+                                setSelectedTarget({
+                                  target: item.target,
+                                  command: id,
+                                });
+                                setModalMemory(true)}
+                              }
+                            }
                             className={'commands-item commands-item-default'}>
-                            {item.target}
+                            {item.command.includes('jump') ?
+                              commands.find((i) => i.command === 'label' && i.id === item.target ).target :
+                            item.target}
                           </button>
                         : null }
                       </div>
