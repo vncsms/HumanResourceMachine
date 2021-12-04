@@ -3,7 +3,6 @@ import PlayButton from '../../assets/icons/play-solid.svg';
 import NextButton from '../../assets/icons/step-forward-solid.svg';
 import StopButton from '../../assets/icons/stop-solid.svg';
 import PauseButton from '../../assets/icons/pause-solid.svg';
-import Arrow from '../../assets/icons/angle-right-solid.svg';
 import { nextChar } from "./utils";
 import { DragDropContext, Droppable, Draggable  } from 'react-beautiful-dnd';
 import {
@@ -410,9 +409,35 @@ export default function MainPage () {
     setCommandHold(null);
     const { source, destination } = result;
     const items = [...commands];
-    if(!destination || destination.droppableId === 'characters2') {
-      items.splice(result.source.index, 1);
-    } else if(source.droppableId === 'characters2') {
+    if (!destination && source.droppableId === 'characters2') {
+      
+    } else if (!destination && source.droppableId === 'characters') {
+      const index = result.source.index;
+
+      if (items[index].command.includes('jump')) {
+        const id = items[index].target;
+        items.splice(index, 1);
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          if (item.command === 'label' && item.id === id) {
+            items.splice(i, 1);
+            break;
+          }
+        }
+      } else if (items[index].command.includes('label')) {
+        const id = items[index].id;
+        items.splice(index, 1);
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          if (item.command.includes('jump') && item.target === id) {
+            items.splice(i, 1);
+            break;
+          }
+        }
+      } else {
+        items.splice(index, 1);
+      }
+    } else if (source.droppableId === 'characters2') {
       const newItem = {
         command: defaultCommands[source.index].command,
         target: 0,
