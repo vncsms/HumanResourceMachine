@@ -337,7 +337,6 @@ export default function MainPage () {
           break;
         }
         mem[parseInt(cmd.target)] = kram;
-        // setMemory(mem);
         offs += 1;
         break;
       case 'copyfrom':
@@ -362,23 +361,36 @@ export default function MainPage () {
         offs += 1;
         break;
       case 'jump':
-        /*if(cmd.target in labels){
-          offs = labels[cmd.target];
-        }*/
+        for (let i = 0; i < commands.length; i++) {
+          if (commands[i].command === 'label' && commands[i].id === cmd.target) {
+            offs = i;
+            break;
+          }
+        }
         break;
       case 'jumpz':
-        /*if(kram === 0) {
-          if(cmd.target in labels){
-            offs = labels[cmd.target];
+        if(kram === 0) {
+          for (let i = 0; i < commands.length; i++) {
+            if (commands[i].command === 'label' && commands[i].id === cmd.target) {
+              offs = i;
+              break;
+            }
           }
-        }*/
+          break;
+        }
+        offs += 1;
         break;
       case 'jumpn':
-        /*if(kram < 0) {
-          if(cmd.target in labels){
-            offs = labels[cmd.target];
+        if(kram < 0) {
+          for (let i = 0; i < commands.length; i++) {
+            if (commands[i].command === 'label' && commands[i].id === cmd.target) {
+              offs = i;
+              break;
+            }
           }
-        }*/
+          break;
+        }
+        offs += 1;
         break;
       default:
         offs += 1;
