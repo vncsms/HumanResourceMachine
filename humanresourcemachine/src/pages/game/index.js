@@ -409,8 +409,8 @@ export default function MainPage () {
     setCommandHold(null);
     const { source, destination } = result;
     const items = [...commands];
-    if (!destination && source.droppableId === 'characters2') {
-      
+    if (source.droppableId === 'characters2' && destination.droppableId === 'characters2') {
+
     } else if (!destination && source.droppableId === 'characters') {
       const index = result.source.index;
 
@@ -437,7 +437,7 @@ export default function MainPage () {
       } else {
         items.splice(index, 1);
       }
-    } else if (source.droppableId === 'characters2') {
+    } else if (source.droppableId === 'characters2' && destination.droppableId === 'characters') {
       const newItem = {
         command: defaultCommands[source.index].command,
         target: 0,
@@ -566,7 +566,7 @@ export default function MainPage () {
         </div>
       : null }
       <DragDropContext onDragStart={handleOnDragStart} onDragEnd={handleOnDragEnd}>
-        <ul style={{right: playing ? 0 : '250px'}} className={'commands-box-placeholder'}>
+        <ul style={{right: playing ? 0 : '250px', listStyleType: 'none'}} className={'commands-box-placeholder'}>
           {defaultCommands.map((item, id) => {
             return (
               <li>
@@ -579,7 +579,7 @@ export default function MainPage () {
         </ul>
         <Droppable droppableId="characters2">
           {(provided) => (
-            <ul style={{right: playing ? 0 : '250px'}}s {...provided.droppableProps} ref={provided.innerRef} 
+            <ul style={{right: playing ? 0 : '250px', listStyleType: 'none'}}s {...provided.droppableProps} ref={provided.innerRef} 
               className={'commands-box-source'}>
               {defaultCommands.map((item, id) => {
                return (
