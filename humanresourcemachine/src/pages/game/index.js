@@ -409,9 +409,7 @@ export default function MainPage () {
     setCommandHold(null);
     const { source, destination } = result;
     const items = [...commands];
-    if (source.droppableId === 'characters2' && destination.droppableId === 'characters2') {
-
-    } else if (!destination && source.droppableId === 'characters') {
+    if (!destination && source.droppableId === 'characters') {
       const index = result.source.index;
 
       if (items[index].command.includes('jump')) {
@@ -437,6 +435,8 @@ export default function MainPage () {
       } else {
         items.splice(index, 1);
       }
+    } else if (source.droppableId === 'characters2' && !destination) {
+
     } else if (source.droppableId === 'characters2' && destination.droppableId === 'characters') {
       const newItem = {
         command: defaultCommands[source.index].command,
@@ -455,6 +455,8 @@ export default function MainPage () {
         setLastLabel(lastLabel + 1);
       }
       items.splice(destination.index, 0, newItem);  
+    } else if (source.droppableId === 'characters2' && destination.droppableId === 'characters2') { 
+
     } else {
       const [reorderedItem] = items.splice(result.source.index, 1);
       items.splice(destination.index, 0, reorderedItem);
@@ -579,7 +581,10 @@ export default function MainPage () {
         </ul>
         <Droppable droppableId="characters2">
           {(provided) => (
-            <ul style={{right: playing ? 0 : '250px', listStyleType: 'none'}}s {...provided.droppableProps} ref={provided.innerRef} 
+            <ul 
+              style={{right: playing ? 0 : '250px', overflowY: 'auto', listStyleType: 'none'}}
+              {...provided.droppableProps}
+              ref={provided.innerRef} 
               className={'commands-box-source'}>
               {defaultCommands.map((item, id) => {
                return (
@@ -600,7 +605,10 @@ export default function MainPage () {
         </Droppable>
         <Droppable droppableId="characters">
           {(provided) => (
-            <ul {...provided.droppableProps} ref={provided.innerRef} 
+            <ul
+              style={{overflowY: 'auto'}}
+              {...provided.droppableProps}
+              ref={provided.innerRef} 
               className={'commands-box'}>
               {commands.map((item, id) => {
                return (
