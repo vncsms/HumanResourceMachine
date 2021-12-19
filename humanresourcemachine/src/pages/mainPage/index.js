@@ -4,14 +4,13 @@ export default class MainPage extends Component {
   render() {
 
     return (
-      <div style={{width: '100%', height: '100%', backgroundColor: 'aliceblue'}}>
+      <div style={{width: '100%', height: '100%', backgroundColor: 'black'}}>
           <div style={{
-            backgroundColor: 'antiquewhite',
             display: 'flex',
             justifyContent: 'center',
             flexDirection: 'row',
           }}>
-            <span style={{fontSize:"80px", margin: '30px 0'}}>
+            <span className="bit" style={{fontSize:"40px", margin: '32px 0'}}>
               Human Resource Machine
             </span>
           </div>
@@ -23,14 +22,17 @@ export default class MainPage extends Component {
             alignItems: 'center',
           }}>
             <a
-              href={"/new-challenge"} 
-              style={{fontSize: '30px', margin: '20px 0'}}>
+              href={"/new-challenge"}
+              className="bit"
+              style={{fontSize: '2rem', margin: '20px 0'}}>
               Create a new challenge
             </a>
             <a
-              style={{fontSize: '30px', margin: '20px 0'}}
+              className="bit"
+              style={{fontSize: '2rem',
+              margin: '20px 0'}}
               href={"/challenges"}>
-              Choose a existing one
+              Choose an existing one
             </a>
           </div>
       </div>

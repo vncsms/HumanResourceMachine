@@ -4,6 +4,7 @@ import NextButton from '../../assets/icons/step-forward-solid.svg';
 import StopButton from '../../assets/icons/stop-solid.svg';
 import PauseButton from '../../assets/icons/pause-solid.svg';
 import { nextChar } from "./utils";
+import { Switch } from 'antd';
 import { DragDropContext, Droppable, Draggable  } from 'react-beautiful-dnd';
 import {
   add,
@@ -50,26 +51,32 @@ export default function MainPage () {
     { 
       command: 'copyfrom',
       hasTarget: true,
+      vector: false,
     },
     {
       command: 'copyto',
       hasTarget: true,
+      vector: false,
     },
     {
       command: 'add',
       hasTarget: true,
+      vector: false,
     },
     {
       command: 'sub',
       hasTarget: true,
+      vector: false,
     },
     {
       command: 'bumpup',
       hasTarget: true,
+      vector: false,
     },
     {
       command: 'bumpdn',
       hasTarget: true,
+      vector: false,
     },
     {
       command: 'jump',
@@ -142,7 +149,7 @@ export default function MainPage () {
     setRam(null);
     setOutbox([]);
     setPlaying(false);
-    setAnswer(false);
+    // setAnswer(false);
   }
 
   const errorHand = () => {
@@ -154,6 +161,12 @@ export default function MainPage () {
   const endExecError = () => {
     setModalError(true);
     setMessageError(`The code is over`);
+    restart();
+  }
+
+  const endExecErrorWrongOutput = () => {
+    setModalError(true);
+    setMessageError(`Output is wrong`);
     restart();
   }
 
@@ -247,6 +260,8 @@ export default function MainPage () {
     const cmd = commands[offs];
     console.log(cmd);
 
+    let value;
+
     switch(cmd.command) {
       case 'add':
         if (kram == null) {
@@ -257,7 +272,9 @@ export default function MainPage () {
           errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = add(ram, mem[parseInt(cmd.target)]);
+
+        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
+        kram = add(ram, mem[value]);
         offs += 1;
         break;
       case 'bumpup':
@@ -265,7 +282,8 @@ export default function MainPage () {
           errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = mem[parseInt(cmd.target)] += 1;
+        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
+        kram = mem[value] += 1;
         offs += 1;
         break;
       case 'bumpdn':
@@ -273,7 +291,8 @@ export default function MainPage () {
           errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = mem[parseInt(cmd.target)] -= 1;
+        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
+        kram = mem[value] -= 1;
         offs -= 1;
         break;
       case 'sub':
@@ -285,7 +304,8 @@ export default function MainPage () {
           errorMemory(cmd.target);
           return { error: 1, message: '', mem, kram, out, inb, offs };
         }
-        kram = sub(ram, mem[parseInt(cmd.target)]);
+        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
+        kram = sub(ram, mem[value]);
         offs += 1;
         break;
       case 'copyto':
@@ -293,7 +313,8 @@ export default function MainPage () {
           errorHand();
           break;
         }
-        mem[parseInt(cmd.target)] = kram;
+        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
+        mem[value] = kram;
         offs += 1;
         break;
       case 'copyfrom':
@@ -301,7 +322,8 @@ export default function MainPage () {
           errorMemory(cmd.target);
           break;
         }
-        kram = mem[parseInt(cmd.target)];
+        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
+        kram = mem[value];
         offs += 1;
         break;
       case 'inbox':
@@ -358,7 +380,6 @@ export default function MainPage () {
   }
 
   const nextCommand2 = (mem, kram, out, inb, offs) => {
-    console.log(offs);
     if(offs >= commands.length) {
       endExecError();
       restart();
@@ -369,6 +390,12 @@ export default function MainPage () {
       return { error: 1, message: '', mem, kram, out, inb, offs };
     }
     const result = freeExectuion(mem, kram, out, inb, offs);
+
+    if (!arrayEquals(result.out, answer.slice(0, result.out.length))) {
+      endExecErrorWrongOutput();
+      return { error: 1, message: '', mem, kram, out, inb, offs };
+    }
+
     if(result.error === 0) {
       setMemory(result.mem);
       setRam(result.kram);
@@ -402,6 +429,13 @@ export default function MainPage () {
       }
     }, 1000);
     setInter(interval);
+  }
+
+  const onChangeVector = (checked, id) => {
+    const items = [...commands];
+    items[id].vector = checked;
+    console.log(items[id]);
+    setCommands(items);
   }
 
   const handleOnDragEnd = (result) => {
@@ -442,6 +476,7 @@ export default function MainPage () {
         command: defaultCommands[source.index].command,
         target: 0,
         hasTarget: defaultCommands[source.index].hasTarget,
+        vector: defaultCommands[source.index].vector,
       }
       if (['jumpz', 'jump', 'jumpn'].includes(newItem.command)) {
         newItem.target = lastLabel + 1;
@@ -454,6 +489,7 @@ export default function MainPage () {
         items.splice(destination.index, 0, newLabel);  
         setLastLabel(lastLabel + 1);
       }
+      console.log(newItem);
       items.splice(destination.index, 0, newItem);  
     } else if (source.droppableId === 'characters2' && destination.droppableId === 'characters2') { 
 
@@ -636,10 +672,17 @@ export default function MainPage () {
                               }
                             }
                             className={'commands-item commands-item-default'}>
+                            {item.vector ? '[' : null}
                             {item.command.includes('jump') ?
                               commands.find((i) => i.command === 'label' && i.id === item.target ).target :
                             item.target}
+                            {item.vector ? ']' : null}
                           </button>
+                        : null }
+                        { item.vector === false || item.vector === true ?
+                          <div className={'commands-item commands-item-default'}>
+                            <Switch checked={item.vector} onChange={(checked) => onChangeVector(checked, id)}/>
+                          </div>
                         : null }
                       </div>
                     </li>
