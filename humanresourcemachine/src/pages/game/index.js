@@ -275,6 +275,10 @@ export default function MainPage () {
 
         value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
         kram = add(ram, mem[value]);
+        if (kram > 999 || kram < -999) {
+          errorHand();
+          return { error: 1, message: '', mem, kram, out, inb, offs };
+        }
         offs += 1;
         break;
       case 'bumpup':
@@ -284,6 +288,10 @@ export default function MainPage () {
         }
         value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
         kram = mem[value] += 1;
+        if (kram > 999 || kram < -999) {
+          errorHand();
+          return { error: 1, message: '', mem, kram, out, inb, offs };
+        }
         offs += 1;
         break;
       case 'bumpdn':
@@ -293,6 +301,10 @@ export default function MainPage () {
         }
         value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
         kram = mem[value] -= 1;
+        if (kram > 999 || kram < -999) {
+          errorHand();
+          return { error: 1, message: '', mem, kram, out, inb, offs };
+        }
         offs -= 1;
         break;
       case 'sub':
@@ -306,6 +318,10 @@ export default function MainPage () {
         }
         value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
         kram = sub(ram, mem[value]);
+        if (kram > 999 || kram < -999) {
+          errorHand();
+          return { error: 1, message: '', mem, kram, out, inb, offs };
+        }
         offs += 1;
         break;
       case 'copyto':
@@ -650,7 +666,7 @@ export default function MainPage () {
                return (
                 <Draggable isDragDisabled={playing} key={id} draggableId={id.toString()} index={id}>
                   {(provided) => (
-                    <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                    <li {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
                       <div 
                         style={{backgroundColor: modalMemory && selectTarget.command === id ? 'green' : (playing && offSet === id ? 'brown' : 'aqua')}}
                         className='commands-container-item'>
