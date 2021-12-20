@@ -4,7 +4,7 @@ import NextButton from '../../assets/icons/step-forward-solid.svg';
 import StopButton from '../../assets/icons/stop-solid.svg';
 import PauseButton from '../../assets/icons/pause-solid.svg';
 import { nextChar } from "./utils";
-import { Switch } from 'antd';
+import { Switch, Modal } from 'antd';
 import { defaultCommands, freeExectuion } from "./utils/code";
 import { 
   endExecError,
@@ -57,27 +57,6 @@ export default function MainPage () {
   }, [location]);
 
   const ref = useRef();
-  useOnClickOutside(ref, () => setModalMemory(false));
-
-  function useOnClickOutside(ref, handler) {
-    useEffect(
-      () => {
-        const listener = (event) => {
-          if (!ref.current || ref.current.contains(event.target)) {
-            return;
-          }
-          handler(event);
-        };
-        document.addEventListener("mousedown", listener);
-        document.addEventListener("touchstart", listener);
-        return () => {
-          document.removeEventListener("mousedown", listener);
-          document.removeEventListener("touchstart", listener);
-        };
-      },
-      [ref, handler]
-    );
-  }
 
   const renderTable = (data) => {
     return (
@@ -175,7 +154,6 @@ export default function MainPage () {
       errorMemory: ((target) => errorMemory(setModalError, setMessageError, restart, target)),
       errorHand: (() => errorHand(setModalError, setMessageError, restart)),
       noOutbox: (() => noOutbox(setModalError, setMessageError, restart)),
-
     } ,{mem, kram, out, inb, offs});
 
     if (!arrayEquals(result.out, answer.slice(0, result.out.length))) {
@@ -361,34 +339,6 @@ export default function MainPage () {
           <div className={styles.innerBox}>{ram}</div>
         </div>
       </div>
-
-      {modalError?
-        <div style={{
-          height: '100%',
-          width: '100%',
-          backgroundColor: '#00000075',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          display: 'flex',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            height: 200,
-            width: 400,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <span>{messageError}</span>
-            <button onClick={() => setModalError(false)} style={{width: 50, height: 30}}>
-              ok
-            </button>
-          </div>
-        </div>
-      : null }
       <DragDropContext onDragStart={handleOnDragStart} onDragEnd={handleOnDragEnd}>
         <ul style={{right: playing ? 0 : '250px', listStyleType: 'none'}} className={'commands-box-placeholder'}>
           {defaultCommands.map((item, id) => {
@@ -481,6 +431,11 @@ export default function MainPage () {
           )}
         </Droppable>
       </DragDropContext>
+      <Modal title="Basic Modal" visible={modalError}
+        onOk={() => setModalError(false)}
+        onCancel={() => setModalError(false)}>
+        <p>{messageError}</p>
+      </Modal>
       {modalMemory?
         <div style={{
           height: '100%',
