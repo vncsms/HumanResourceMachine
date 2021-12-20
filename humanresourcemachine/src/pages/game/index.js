@@ -5,6 +5,15 @@ import StopButton from '../../assets/icons/stop-solid.svg';
 import PauseButton from '../../assets/icons/pause-solid.svg';
 import { nextChar } from "./utils";
 import { Switch } from 'antd';
+import { defaultCommands, freeExectuion } from "./utils/code";
+import { 
+  endExecError,
+  endExecErrorWrongOutput,
+  noOutbox,
+  errorHand,
+  errorMemory,
+  endExecSuccess,
+} from './utils/errors';
 import { DragDropContext, Droppable, Draggable  } from 'react-beautiful-dnd';
 import {
   add,
@@ -39,58 +48,7 @@ export default function MainPage () {
     command: 0,
     target: 0,
   });
-  const [defaultCommands] = useState([
-    { 
-      command: 'inbox',
-      hasTarget: false,
-    },
-    { 
-      command: 'outbox',
-      hasTarget: false,
-    },
-    { 
-      command: 'copyfrom',
-      hasTarget: true,
-      vector: false,
-    },
-    {
-      command: 'copyto',
-      hasTarget: true,
-      vector: false,
-    },
-    {
-      command: 'add',
-      hasTarget: true,
-      vector: false,
-    },
-    {
-      command: 'sub',
-      hasTarget: true,
-      vector: false,
-    },
-    {
-      command: 'bumpup',
-      hasTarget: true,
-      vector: false,
-    },
-    {
-      command: 'bumpdn',
-      hasTarget: true,
-      vector: false,
-    },
-    {
-      command: 'jump',
-      hasTarget: true,
-    },
-    {
-      command: 'jumpz',
-      hasTarget: true,
-    },
-    {
-      command: 'jumpn',
-      hasTarget: true,
-    }
-  ])
+  
 
   useEffect(() => {
     const data = location.state.data;
@@ -108,7 +66,6 @@ export default function MainPage () {
     useEffect(
       () => {
         const listener = (event) => {
-          // Do nothing if clicking ref's element or descendent elements
           if (!ref.current || ref.current.contains(event.target)) {
             return;
           }
@@ -124,8 +81,6 @@ export default function MainPage () {
       [ref, handler]
     );
   }
-
-  
 
   const renderTable = (data) => {
     return (
@@ -150,42 +105,6 @@ export default function MainPage () {
     setOutbox([]);
     setPlaying(false);
     // setAnswer(false);
-  }
-
-  const errorHand = () => {
-    setModalError(true);
-    setMessageError(`There is nothing in your hand`);
-    restart();
-  }
-
-  const endExecError = () => {
-    setModalError(true);
-    setMessageError(`The code is over`);
-    restart();
-  }
-
-  const endExecErrorWrongOutput = () => {
-    setModalError(true);
-    setMessageError(`Output is wrong`);
-    restart();
-  }
-
-  const endExecSuccess = () => {
-    setModalError(true);
-    setMessageError(`You finished the challenge`);
-    restart();
-  }
-
-  const noOutbox = () => {
-    setModalError(true);
-    setMessageError(`There is no inbox blocks`);
-    restart();
-  }
-
-  const errorMemory = (position) => {
-    setModalError(true);
-    setMessageError(`There is nothing in the memory ${position}`);
-    restart();
   }
 
   const isNumeric = (str) => {
@@ -255,160 +174,27 @@ export default function MainPage () {
       a.every((val, index) => val === b[index]);
   }
 
-  const freeExectuion = (mem, kram, out, inb, offs) => {
-
-    const cmd = commands[offs];
-    console.log(cmd);
-
-    let value;
-
-    switch(cmd.command) {
-      case 'add':
-        if (kram == null) {
-          errorHand();
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        if (mem[parseInt(cmd.target)] == null) {
-          errorMemory(cmd.target);
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-
-        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
-        kram = add(ram, mem[value]);
-        if (kram > 999 || kram < -999) {
-          errorHand();
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        offs += 1;
-        break;
-      case 'bumpup':
-        if (mem[parseInt(cmd.target)] == null) {
-          errorMemory(cmd.target);
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
-        kram = mem[value] += 1;
-        if (kram > 999 || kram < -999) {
-          errorHand();
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        offs += 1;
-        break;
-      case 'bumpdn':
-        if (mem[parseInt(cmd.target)] == null) {
-          errorMemory(cmd.target);
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
-        kram = mem[value] -= 1;
-        if (kram > 999 || kram < -999) {
-          errorHand();
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        offs -= 1;
-        break;
-      case 'sub':
-        if (kram == null) {
-          errorHand();
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        if (mem[parseInt(cmd.target)] == null) {
-          errorMemory(cmd.target);
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
-        kram = sub(ram, mem[value]);
-        if (kram > 999 || kram < -999) {
-          errorHand();
-          return { error: 1, message: '', mem, kram, out, inb, offs };
-        }
-        offs += 1;
-        break;
-      case 'copyto':
-        if (kram == null) {
-          errorHand();
-          break;
-        }
-        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
-        mem[value] = kram;
-        offs += 1;
-        break;
-      case 'copyfrom':
-        if (mem[parseInt(cmd.target)] == null) {
-          errorMemory(cmd.target);
-          break;
-        }
-        value = cmd.vector ? mem[parseInt(cmd.target)] : parseInt(cmd.target) ;
-        kram = mem[value];
-        offs += 1;
-        break;
-      case 'inbox':
-        if(inbox.length === 0) {
-          noOutbox();
-          break;
-        }
-        kram = inb.shift();
-        offs += 1;
-        break;
-      case 'outbox':
-        out.unshift(kram);
-        kram = null;
-        offs += 1;
-        break;
-      case 'jump':
-        for (let i = 0; i < commands.length; i++) {
-          if (commands[i].command === 'label' && commands[i].id === cmd.target) {
-            offs = i;
-            break;
-          }
-        }
-        break;
-      case 'jumpz':
-        if(kram === 0) {
-          for (let i = 0; i < commands.length; i++) {
-            if (commands[i].command === 'label' && commands[i].id === cmd.target) {
-              offs = i;
-              break;
-            }
-          }
-          break;
-        }
-        offs += 1;
-        break;
-      case 'jumpn':
-        if(kram < 0) {
-          for (let i = 0; i < commands.length; i++) {
-            if (commands[i].command === 'label' && commands[i].id === cmd.target) {
-              offs = i;
-              break;
-            }
-          }
-          break;
-        }
-        offs += 1;
-        break;
-      default:
-        offs += 1;
-        console.log("NENHUM CASO");
-    }
-
-    return { error: 0, message: '', mem, kram, out, inb, offs };
-  }
+  
 
   const nextCommand2 = (mem, kram, out, inb, offs) => {
     if(offs >= commands.length) {
-      endExecError();
+      endExecError(setModalError, setMessageError, restart);
       restart();
       return { error: 1, message: '', mem, kram, out, inb, offs };
     } else if (arrayEquals(outbox, answer)) {
-      endExecSuccess();
+      endExecSuccess(setModalError, setMessageError, restart);
       restart();
       return { error: 1, message: '', mem, kram, out, inb, offs };
     }
-    const result = freeExectuion(mem, kram, out, inb, offs);
+    const result = freeExectuion(commands, {
+      errorMemory: ((target) => errorMemory(setModalError, setMessageError, restart, target)),
+      errorHand: (() => errorHand(setModalError, setMessageError, restart)),
+      noOutbox: (() => noOutbox(setModalError, setMessageError, restart)),
+
+    } ,{mem, kram, out, inb, offs});
 
     if (!arrayEquals(result.out, answer.slice(0, result.out.length))) {
-      endExecErrorWrongOutput();
+      endExecErrorWrongOutput(setModalError, setMessageError, restart);
       return { error: 1, message: '', mem, kram, out, inb, offs };
     }
 
