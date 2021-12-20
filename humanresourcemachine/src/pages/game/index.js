@@ -15,10 +15,7 @@ import {
   endExecSuccess,
 } from './utils/errors';
 import { DragDropContext, Droppable, Draggable  } from 'react-beautiful-dnd';
-import {
-  add,
-  sub
-} from '../../components/functions';
+import { arrayEquals, isNumeric } from './utils/utils';
 import {
   useLocation
 } from "react-router-dom";
@@ -107,10 +104,7 @@ export default function MainPage () {
     // setAnswer(false);
   }
 
-  const isNumeric = (str) => {
-    if (typeof str != "string") return false
-    return !isNaN(str) && !isNaN(parseFloat(str))
-  }
+
 
   const compile = () => {
     const listCommands = code.split('\n');
@@ -166,15 +160,6 @@ export default function MainPage () {
       setCommands(tempC);
     }
   }
-
-  const arrayEquals = (a, b) => {
-    return Array.isArray(a) &&
-      Array.isArray(b) &&
-      a.length === b.length &&
-      a.every((val, index) => val === b[index]);
-  }
-
-  
 
   const nextCommand2 = (mem, kram, out, inb, offs) => {
     if(offs >= commands.length) {
@@ -236,7 +221,6 @@ export default function MainPage () {
   const onChangeVector = (checked, id) => {
     const items = [...commands];
     items[id].vector = checked;
-    console.log(items[id]);
     setCommands(items);
   }
 
