@@ -317,7 +317,20 @@ export default function MainPage () {
         {
           memory.map((item, index) =>
             (
-              <div className={styles.memory} key={index}>
+              <button onClick={() => {
+                  if (modalMemory) {
+                    /*setSelectedTarget({ 
+                      command: selectTarget.command,
+                      target: index,
+                    });*/
+                    const items = [...commands];
+                    items[selectTarget.command].target = index;
+                    setCommands(items);
+                    setModalMemory(false);
+                  }
+                }}
+                className={styles.memory}
+                key={index}>
                 { item || item === 0 ? 
                     (
                       <div className={styles.box}>
@@ -326,7 +339,7 @@ export default function MainPage () {
                     )
                   : null}
                 <div style={{position: 'absolute', bottom: 0}}>{index}</div>
-              </div>
+              </button>
             )
           )
         }
@@ -415,7 +428,7 @@ export default function MainPage () {
                             {item.vector ? ']' : null}
                           </button>
                         : null }
-                        { item.vector === false || item.vector === true ?
+                        { modalMemory && (item.vector === false || item.vector === true) ?
                           <div className={'commands-item commands-item-default'}>
                             <Switch checked={item.vector} onChange={(checked) => onChangeVector(checked, id)}/>
                           </div>
@@ -436,46 +449,6 @@ export default function MainPage () {
         onCancel={() => setModalError(false)}>
         <p>{messageError}</p>
       </Modal>
-      {modalMemory?
-        <div style={{
-          height: '100%',
-          width: '100%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          display: 'flex',
-        }}>
-          <div className='memory-board' ref={ref}>
-            {
-              memory.map((item, index) =>
-                (
-                  <button style={{borderColor: selectTarget.target === index ? 'red' : '#294d07'}}
-                    onClick={() => {
-                      setSelectedTarget({ 
-                        command: selectTarget.command,
-                        target: index,
-                      });
-                      const items = [...commands];
-                      items[selectTarget.command].target = index;
-                      setCommands(items);
-                      setModalMemory(false);
-                    }}
-                    className={styles.memory} key={index}>
-                    { item || item === 0 ? 
-                        (
-                          <div className={styles.box}>
-                            <div className={styles.innerBox}>{item}</div>
-                          </div>
-                        )
-                      : null}
-                    <div style={{position: 'absolute', bottom: 0}}>{index}</div>
-                  </button>
-                )
-              )
-            }
-          </div>
-        </div>
-      : null }
     </div>       
   );
 }
