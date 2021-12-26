@@ -288,7 +288,7 @@ export default function MainPage () {
       </div>
       <div className='control-panel'>
         <button className="button-game"
-          disabled={playing}
+          disabled={playing || modalMemory}
           style={{
             backgroundColor: !playing ? "#43b280" : 'rgb(190, 204, 199)',
           }}
@@ -296,7 +296,7 @@ export default function MainPage () {
           <img className="control-button" src={NextButton} alt="React Logo" />
         </button>
         <button className="button-game"
-          disabled={commands.length === 0}
+          disabled={commands.length === 0 || modalMemory}
           style={{ backgroundColor: "#43b280" }}
           onClick={() => {
             setPlaying(!playing);
@@ -305,6 +305,7 @@ export default function MainPage () {
         </button>
         <button style={{backgroundColor: 'brown'}}
           className="button-game"
+          disabled={modalMemory}
           onClick={() => {
             clearInterval(interval);
             restart();
@@ -329,6 +330,7 @@ export default function MainPage () {
                     setModalMemory(false);
                   }
                 }}
+                style={{border: modalMemory && selectTarget.target == index ? '1px solid red' : '1px solid #294d07'}}
                 className={styles.memory}
                 key={index}>
                 { item || item === 0 ? 
@@ -373,7 +375,7 @@ export default function MainPage () {
               className={'commands-box-source'}>
               {defaultCommands.map((item, id) => {
                return (
-                <Draggable isDragDisabled={playing} key={id} draggableId={(id).toString() + 'k'} index={id}>
+                <Draggable isDragDisabled={playing || modalMemory} key={id} draggableId={(id).toString() + 'k'} index={id}>
                   {(provided) => (
                     <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
                       <div className={commandHold === id ? 'commands-item-hold commands-item-default' : 'commands-item-default commands-item-invisible' }>
@@ -397,7 +399,7 @@ export default function MainPage () {
               className={'commands-box'}>
               {commands.map((item, id) => {
                return (
-                <Draggable isDragDisabled={playing} key={id} draggableId={id.toString()} index={id}>
+                <Draggable isDragDisabled={playing || modalMemory} key={id} draggableId={id.toString()} index={id}>
                   {(provided) => (
                     <li {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
                       <div 
